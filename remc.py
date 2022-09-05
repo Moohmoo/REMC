@@ -1,3 +1,4 @@
+from ctypes.wintypes import HACCEL
 import random
 
 # Paramters : (φ, τ Min , τ max , χ, ρ) with φ the number of local steps in a Monte Carlo search, 
@@ -17,10 +18,14 @@ class Conformation :
         self.representation = tab_temp1
         self.coordinate = tab_temp2
 
+    # add covalent bond
     def printConformation(self) :
         for i in range(self.length * 2) :
             for j in range(self.length * 2) :
-                print(self.representation[i][j], " ", end="")
+                if self.representation[i][j] != 0 :
+                    print(self.representation[i][j], " ", end="")
+                else :
+                    print("   ", end="")
             print("")
         print("----------------------------------")
 
@@ -37,12 +42,45 @@ class Conformation :
             self.representation[i][j] = residue
             self.coordinate[pos] = [i, j]
 
+    def translateToHP(self) :
+        hydrophobic = ["A", "I", "L", "M", "F", "W", "Y", "V"]
+        polar = ["T", "K", "R", "H"]
+        sequence = list(self.sequence)
+        for pos, residue in enumerate(sequence) :
+            if residue in hydrophobic :
+                sequence[pos] = "H"
+            elif residue in polar :
+                sequence[pos] = "P"
+        self.sequence = sequence
+
+    def __getFreePosition(self, k) :
+        steps = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+        i, j = self.coordinate[k][0], self.coordinate[k][1]
+        for step in steps :
+            if self.representation[i + step[0]][j + step[1]] == 0 :
+                return [i + step[0], j + step[1]]
+        return [0, 0]
+
+    def endMoves (self, k) :
+        if (k == 0 or k == self.length - 1) :
+            i, j = self.coordinate[k][0], self.coordinate[k][1] 
+            new_coordinate = self.__getFreePosition(k + 1) if k == 0 else self.__getFreePosition(k - 1) 
+            new_i, new_j = new_coordinate[0], new_coordinate[1]
+            self.representation[new_i][new_j] = self.representation[i][j]
+            self.representation[i][j] = 0
+
+    """
+
+    def neighbourhoods () :
+        return True
+
+
     def goodNeighbour(self, k, i, j) :
         previous = self.coordinate[k-1]
         next = self.coordinate[k+1]
         flag1 = False
         flag2 = False
-        steps = [[-1,0], [1, 0], [0, -1], [0, 1]]
+        steps = [[-1, 0], [1, 0], [0, -1], [0, 1]]
         for step in steps :
             if self.representation[i + step[0]][j + step[1]] == self.representation[previous[0]][previous[1]] :
                 flag1 = True
@@ -67,34 +105,13 @@ class Conformation :
         else :
             print("[Error] Unable to change residue positions : " + self.sequence[k])
 
-    """
-    def changeConformation(self, k) :
-        temp = Conformation(self.sequence)
-        temp.representation = self.representation
-        temp.coordinate = self.coordinate
-
-        previousI, previousJ = self.coordinate[k-1][0], self.coordinate[k-1][1] 
-        i, j = previousI, previousJ
-        temp_i, temp_j = i, j
-        while (True) :
-            while (self.representation[i][j] != 0 or (not self.isAdjacent(i, j))) :
-                temp_i = i + random.randint(-1, 1)
-                temp_j = j + random.randint(-1, 1)
-        
-            temp.representation[i][j] = temp.representation[previousI][previousJ]
-            temp.representation[previousI][previousJ] = 0
-
-            if temp.isAllAdjacent() :
-                break
-
-        self.representation[i][j] = self.representation[previousI][previousJ]
-        self.representation[previousI][previousJ] = 0
-    """
-        
+    """ 
 
 
 ma_conformation = Conformation("ARKLHGL")
+#ma_conformation.translateToHP()
 ma_conformation.generateConformation()
 ma_conformation.printConformation()
-ma_conformation.changeConformation(1)
+ma_conformation.endMoves(6)
+#ma_conformation.changeConformation(1)
 ma_conformation.printConformation()
