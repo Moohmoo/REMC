@@ -1,4 +1,3 @@
-
 class Residu :
 
     def __init__(self, residu=None, previous=None, next=None, coordinate=None) :

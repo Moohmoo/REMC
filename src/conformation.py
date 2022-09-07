@@ -1,4 +1,5 @@
 import random
+import math
 
 from residu import Residu
 
@@ -60,12 +61,16 @@ class Conformation :
     def __getFreePosition(self, k) :
         steps = [[-1, 0], [1, 0], [0, -1], [0, 1]]
         i, j = self.coordinate[k][0], self.coordinate[k][1]
-        for step in steps :
+        done = []
+        while len(done) != 4 :
+            step = random.choice(steps)
             if self.representation[i + step[0]][j + step[1]].getResidu() == None :
                 return [i + step[0], j + step[1]]
+            if step not in done :
+                done.append(step)
         return None
 
-    def endMoves (self, k) :
+    def endMove(self, k) :
         if (k == 0 or k == self.length - 1) :
             i, j = self.coordinate[k][0], self.coordinate[k][1] 
             new_coordinate = self.__getFreePosition(k + 1) if k == 0 else self.__getFreePosition(k - 1) 
@@ -77,21 +82,35 @@ class Conformation :
             else :
                 print("[Error] EndMove impossible")
 
-    def cornerMoves(self, k) :
-        if (k != 0 and k != self.length - 1) :
-            i, j = self.coordinate[k][0], self.coordinate[k][1]
-            while(True) :
-                new_coordinate_left = self.__getFreePosition(k - 1)
-                new_coordinate_right = self.__getFreePosition(k + 1)
-                if (not new_coordinate_left == None and not new_coordinate_right == None \
-                    and new_coordinate_left == new_coordinate_right) :
-                    new_i, new_j = new_coordinate_left[0], new_coordinate_right[1]
+    def cornerMove(self, k) :
+        if (k > 0 and k < self.length - 1) :
+            dist = math.dist(self.coordinate[k-1], self.coordinate[k+1])
+            if (dist == math.sqrt(2)) :
+                if (self.coordinate[k + 1][0] == self.coordinate[k][0] or
+                    self.coordinate[k - 1][1] == self.coordinate[k][1]) :
+                    new_coordinate = [self.coordinate[k - 1][0], self.coordinate[k + 1][1]]
+                else :
+                    new_coordinate = [self.coordinate[k + 1][0], self.coordinate[k - 1][1]]
+
+                if (self.representation[new_coordinate[0]][new_coordinate[1]].getResidu() == None) :
+                    i, j = self.coordinate[k][0], self.coordinate[k][1]
+                    new_i, new_j = new_coordinate[0], new_coordinate[1]
                     self.representation[new_i][new_j].setResidu(self.representation[i][j].getResidu())
                     self.representation[i][j].setResidu(None)
                     self.coordinate[k] = [new_i, new_j]
-                    break
-                else :
+                else :    
                     print("[Error] CornerMoves impossible")
+            else :
+                print("[Error] CornerMoves impossible")
+
+    def crankshaftMove(self, k) :
+        if (k > 1 and k < self.length - 2) :
+            dist1 = math.dist(self.coordinate[k-1], self.coordinate[k+1])
+            dist2 = math.dist(self.coordinate[k], self.coordinate[k+2])
+            if (dist1 == math.sqrt(2) and dist2 == math.sqrt(2)) :
+                print("test")
+            else :
+                print("[Error] CrankshaftMove impossible")
 
 
             
@@ -138,6 +157,6 @@ if __name__ == "__main__" :
     ma_conformation.generateConformation()
     #ma_conformation.translateToHP()
     ma_conformation.printConformation()
-    ma_conformation.endMoves(6)
-    ma_conformation.cornerMoves(5)
+    #ma_conformation.endMove(6)
+    ma_conformation.cornerMove(5)
     ma_conformation.printConformation()
