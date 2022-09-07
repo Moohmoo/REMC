@@ -12,12 +12,10 @@ class Conformation :
         self.sequence = sequence
         self.length = len(self.sequence)
         self.coordinate = self.length * [0, 0]
-        self.representation = []
+        self.representation = [[] for i in range(2 * self.length)]
         for i in range(2 * self.length) :
-            self.representation.append([])
-            for j in range(2 * self.length) :
-                self.representation[i].append(Residu())
-        
+            self.representation[i] = [Residu() for j in range(2 * self.length)]
+
     # add covalent bond
     def printConformation(self) :
         for i in range(self.length * 2) :
@@ -47,22 +45,21 @@ class Conformation :
                 self.representation[i][j].setPrevious(previous)
             previous = self.representation[i][j]
             
-    def translateToHP(self, HP=True) :
+    def translateToHP(self) :
         hydrophobicity = {"A": "H", "I": "H", "L": "H", "M": "H", "F": "H", 
         "W": "H", "Y": "H", "V": "H", "G": "H", "P": "H",
         "T": "P", "K": "P", "R": "P", "H": "P", "D": "P", "E": "P", "S": "P", 
         "N": "P", "Q": "P", "C": "P", "U": "P"}
         sequence = list(self.sequence)
         for k in range(len(sequence)) :
-            if HP :
-                i, j = self.coordinate[k][0], self.coordinate[k][1]
-                self.representation[i][j].setResidu(hydrophobicity[sequence[k]])
+            i, j = self.coordinate[k][0], self.coordinate[k][1]
+            self.representation[i][j].setResidu(hydrophobicity[sequence[k]])
 
     def __getFreePosition(self, k) :
         steps = [[-1, 0], [1, 0], [0, -1], [0, 1]]
         i, j = self.coordinate[k][0], self.coordinate[k][1]
         for step in steps :
-            if self.representation[i + step[0]][j + step[1]] == 0 :
+            if self.representation[i + step[0]][j + step[1]].getResidu() == None :
                 return [i + step[0], j + step[1]]
         return None
 
@@ -72,10 +69,18 @@ class Conformation :
             new_coordinate = self.__getFreePosition(k + 1) if k == 0 else self.__getFreePosition(k - 1) 
             if (new_coordinate != None) :
                 new_i, new_j = new_coordinate[0], new_coordinate[1]
-                self.representation[new_i][new_j] = self.representation[i][j]
-                self.representation[i][j] = 0
+                self.representation[new_i][new_j].setResidu(self.representation[i][j].getResidu())
+                self.representation[i][j].setResidu(None)
+                self.coordinate[k] = [new_i, new_j]
             else :
                 print("[Error] Move impossible")
+
+    def cornerMoves(self, k) :
+        if (k != 0 and k != self.length - 1) :
+            i, j = self.coordinate[k][0], self.coordinate[k][1]
+            new_coordinate_left = self.__getFreePosition(k - 1)
+            new_coordinate_right = self.__getFreePosition(k + 1)
+            
 
     """
     def neighbourhoods () :
@@ -118,9 +123,8 @@ if __name__ == "__main__" :
     ma_conformation = Conformation("ARKLHGL")
 
     ma_conformation.generateConformation()
-    ma_conformation.translateToHP()
+    #ma_conformation.translateToHP()
     ma_conformation.printConformation()
     ma_conformation.endMoves(6)
     #ma_conformation.changeConformation(1)
     ma_conformation.printConformation()
-    
