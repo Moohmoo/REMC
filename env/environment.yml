@@ -1,0 +1,6 @@
+name: remc
+channels:
+  - anaconda
+  - defaults
+dependencies:
+  - pandas=1.4.3

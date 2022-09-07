@@ -12,14 +12,16 @@ class Conformation :
         self.sequence = sequence
         self.length = len(self.sequence)
         self.coordinate = self.length * [0, 0]
-        self.representation = [[] for i in range(2 * self.length)]
-        for i in range(2 * self.length) :
-            self.representation[i] = [Residu() for j in range(2 * self.length)]
+        len_representation = 2 * self.length + 1
+        self.representation = [[] for i in range(len_representation)]
+        for i in range(len_representation) :
+            self.representation[i] = [Residu() for j in range(len_representation)]
 
     # add covalent bond
     def printConformation(self) :
-        for i in range(self.length * 2) :
-            for j in range(self.length * 2) :
+        len_representation = 2 * self.length + 1
+        for i in range(len_representation) :
+            for j in range(len_representation) :
                 print(self.representation[i][j], " ", end="")
             print("")
         print("----------------------------------")
@@ -73,13 +75,25 @@ class Conformation :
                 self.representation[i][j].setResidu(None)
                 self.coordinate[k] = [new_i, new_j]
             else :
-                print("[Error] Move impossible")
+                print("[Error] EndMove impossible")
 
     def cornerMoves(self, k) :
         if (k != 0 and k != self.length - 1) :
             i, j = self.coordinate[k][0], self.coordinate[k][1]
-            new_coordinate_left = self.__getFreePosition(k - 1)
-            new_coordinate_right = self.__getFreePosition(k + 1)
+            while(True) :
+                new_coordinate_left = self.__getFreePosition(k - 1)
+                new_coordinate_right = self.__getFreePosition(k + 1)
+                if (not new_coordinate_left == None and not new_coordinate_right == None \
+                    and new_coordinate_left == new_coordinate_right) :
+                    new_i, new_j = new_coordinate_left[0], new_coordinate_right[1]
+                    self.representation[new_i][new_j].setResidu(self.representation[i][j].getResidu())
+                    self.representation[i][j].setResidu(None)
+                    self.coordinate[k] = [new_i, new_j]
+                    break
+                else :
+                    print("[Error] CornerMoves impossible")
+
+
             
 
     """
@@ -121,10 +135,9 @@ class Conformation :
 
 if __name__ == "__main__" :
     ma_conformation = Conformation("ARKLHGL")
-
     ma_conformation.generateConformation()
     #ma_conformation.translateToHP()
     ma_conformation.printConformation()
     ma_conformation.endMoves(6)
-    #ma_conformation.changeConformation(1)
+    ma_conformation.cornerMoves(5)
     ma_conformation.printConformation()
