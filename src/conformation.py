@@ -108,7 +108,7 @@ class Conformation :
             dist1 = math.dist(self.coordinate[k-1], self.coordinate[k+1])
             dist2 = math.dist(self.coordinate[k], self.coordinate[k+2])
             if (dist1 == math.sqrt(2) and dist2 == math.sqrt(2)) :
-                print("test")
+                print("xi-1 + (xi-1 - xi)", "yi-1 + (yi-1 - yi)")
             else :
                 print("[Error] CrankshaftMove impossible")
 
