@@ -154,8 +154,9 @@ class Conformation :
             print("[Error] CrankshaftMove impossible 3")
 
     def __isConnect(self, k) :
-        return True
-
+        if (k > 0 and k < self.length - 1) :
+            dist = math.dist(self.__coordinate[k - 1], self.__coordinate[k + 1])
+            return dist == 2
 
     def pullMove(self, k) :
         if (k >= 1 and k <= self.length - 2) :
@@ -165,7 +166,10 @@ class Conformation :
                 old_coordinate1 = self.__coordinate[k]
                 old_coordinate2 = self.__coordinate[k-1]
                 self.__move(new_coordinate1, old_coordinate1)
-                self.__move(new_coordinate2, old_coordinate2)  
+                self.__move(new_coordinate2, old_coordinate2)
+                i = 1
+                while (not self.__isConnect(k - i)) :
+                    print("is_connect ne fonctionne pas")
         else :
             print("[Error] pullMove impossible")
 
