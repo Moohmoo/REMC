@@ -19,7 +19,7 @@ def MCsearch (n_mc, conformation) :
             conformation = copy.copy(temp_conformation)
         else :
             q = random.uniform(0, 1)
-            if q > math.exp((-diff_energy)/conformation.getTemprature()) :
+            if q > math.exp((-diff_energy)/conformation.getTemperature()) :
                 conformation = copy.copy(temp_conformation) 
     return conformation
 
