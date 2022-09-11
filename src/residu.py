@@ -1,13 +1,25 @@
 class Residu :
 
-    def __init__(self, residu=None, previous=None, next=None, coordinate=None) :
+    def __init__(self, residu=None, previous=None, next=None, coordinate=None, hydrophobicity=None) :
         self.residu = residu
         self.previous = previous
         self.next = next
-        self.coordinate = coordinate
+        self._coordinate = coordinate
+        self.hydrophobicity = hydrophobicity
+
+    def translateHP(self) :
+        hydrophobicity = {"A": "H", "I": "H", "L": "H", "M": "H", "F": "H", 
+        "W": "H", "Y": "H", "V": "H", "G": "H", "P": "H",
+        "T": "P", "K": "P", "R": "P", "H": "P", "D": "P", "E": "P", "S": "P", 
+        "N": "P", "Q": "P", "C": "P", "U": "P"}
+        if (self.residu in hydrophobicity) :
+            self.hydrophobicity = hydrophobicity[self.residu]
 
     def getResidu(self) :
         return self.residu
+
+    def getHydrophobicity(self) :
+        return self.hydrophobicity
 
     def getPrevious(self) :
         return self.previous
@@ -20,6 +32,9 @@ class Residu :
 
     def setResidu(self, residu) :
         self.residu = residu
+    
+    def setHydrophobicity(self, hydrophobicity) :
+        self.hydrophobicity = hydrophobicity
 
     def setPrevious(self, previous) :
         self.previous = previous
