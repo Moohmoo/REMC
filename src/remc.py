@@ -3,7 +3,6 @@ import math
 import copy
 import time
 from tqdm import tqdm
-from multiprocessing import Process
 
 from conformation import Conformation
 
@@ -12,7 +11,7 @@ from conformation import Conformation
 # number of replicas to simulate 
 
 def MCsearch (n_mc, conformation) :
-    for i in tqdm(range(n_mc), desc="Monte Carlo research processing ") :
+    for i in tqdm(range(n_mc), desc="MC research processing ") :
         temp_conformation = copy.deepcopy(conformation)
         k = random.uniform(0, temp_conformation.getLength() - 1)
         temp_conformation.changeConformation(k)
@@ -27,16 +26,15 @@ def MCsearch (n_mc, conformation) :
                 conformation = copy.deepcopy(temp_conformation) 
     return conformation
 
-def REMCSimulation(sequence, optimal_energy, n_mc, temperature, n_replica, step) :
+def REMCSimulation(sequence, optimal_energy, n_mc, temp_min, temp_max, n_replica, step) :
     temp_energy = 0
     conformations = [None for i in range(n_replica)]
+    temperature = temp_min
     while temp_energy > optimal_energy :
         for i in range(n_replica) :
             conformation_temp = Conformation(sequence, temperature)
+            temperature += ((temp_max - temp_min) // n_replica)
             conformation_temp.generateConformation()
-            p = Process(target=MCsearch, args=(n_mc, conformation_temp,))
-            p.start()
-            p.join()
             conformations[i] = MCsearch(n_mc, conformation_temp)
             if conformations[i].getEnergy() < temp_energy :
                 temp_energy = conformations[i].getEnergy()
@@ -69,6 +67,7 @@ def getBestConformation(conformations) :
     return best_conformation
 
 if __name__ == "__main__" :
+    """
     start = time.time()
     conformations = REMCSimulation("ARKLHGLARKLHGLARKLHGLARKLHGL", -2, 500, 220, 2, 0.5)
     best_conformation = getBestConformation(conformations)
@@ -76,3 +75,6 @@ if __name__ == "__main__" :
     print("Energy : ", best_conformation.getEnergy())
     end = time.time()
     print(f"The elapsed time in seconds : {end - start:0.2f}")
+    """
+    conformations = REMCSimulation("ARKLHGLARKLHGLARKLHGLARKLHGL", -2, 500, 220, 250, 2, 0.5)
+    best_conformation = getBestConformation(conformations)

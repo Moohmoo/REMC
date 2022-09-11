@@ -197,6 +197,7 @@ class Conformation :
         return None
 
     def pullMove(self, k) :
+        positions = [[k + 1, k - 1], [k - 1, k + 1]]
         if (k >= 1 and k <= self.length - 2) :
             new_coordinate1 = self.__getFreePosition(k)
             new_coordinate2 = self.__getFreePosition(k + 1)
@@ -232,9 +233,10 @@ class Conformation :
                     self.pullMove(k)
         except :
             #print("The conformation has not been changed. Reloading ...")
+            """
             k = random.choice(list(range(0, self.length)))
             self.changeConformation(k)
-
+            """
     def calculateEnergy(self) :
         energy = 0
         for k in range(len(self.__coordinate)) :
