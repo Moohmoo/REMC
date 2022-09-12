@@ -3,7 +3,8 @@ import math
 from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+import copy
 
 
 from residu import Residu
@@ -20,9 +21,15 @@ class Conformation :
 
     def _createRepresentation(self) :
         len_representation = 2 * self.length + 1
+        """
         self.__representation = [[] for i in range(len_representation)]
+        #test = [[Residu()]*(len_representation-1)]*(len_representation-1)
+        #print(self.length, " ", self.__representation[0][0].getResidu())
+        #self.__representation = [] * len_representation
         for i in range(len_representation) :
             self.__representation[i] = [Residu() for j in range(len_representation)]
+        """
+        self.__representation = [[Residu() for i in range(len_representation)] for j in range(len_representation)]
 
     # add covalent bond
     def printConformation(self, modele) :
@@ -47,17 +54,24 @@ class Conformation :
         plt.grid(False)
         plt.axis(False)
         coordinate = self.__coordinate
-        x, y = [], []
+        x, y = [coordinate[0][0]], [coordinate[0][1]]
+        ax.text(0, coordinate[0][0] + 0.15, coordinate[0][1] + 0.25, self.__representation[coordinate[0][0]][coordinate[0][1]].getResidu())
         previousX = coordinate[0][0]
         previousY = coordinate[0][1]
+        color = [1 if self.__representation[previousX][previousY].getHydrophobicity() == "H" else 0]
         for i in range(1, len(coordinate)) :
             x.append(coordinate[i][0])
             y.append(coordinate[i][1])
             ax.plot([0, 0] , [previousX, coordinate[i][0]], [previousY, coordinate[i][1]], color="black")
-            ax.text(0, coordinate[i][0] + 0.15, coordinate[i][1] + 0.25, "H")
+            ax.text(0, coordinate[i][0] + 0.15, coordinate[i][1] + 0.25, self.__representation[coordinate[i][0]][coordinate[i][1]].getResidu())
             previousX = coordinate[i][0]
             previousY = coordinate[i][1]
-        ax.scatter(0, x, y)
+            if (self.__representation[previousX][previousY].getHydrophobicity() == "H") :
+                color.append(1)
+            else :
+                color.append(0)
+        sc = ax.scatter(0, x, y, c=color, s = 50, cmap=cm.coolwarm)
+        plt.legend(*sc.legend_elements())
         plt.show()
 
     def __getFreePosition(self, k) :
@@ -72,18 +86,27 @@ class Conformation :
                 done.append(step)
         return None
 
+    def generateConformationLinear(self) :
+        for k in range(self.length) :
+            i, j = self.length, self.length
+            self.__representation[i][j + k].setResidu(self.sequence[k])
+            self.__representation[i][j + k].translateHP()
+            self.__coordinate[k] = [i, j + k]
+
     # Prendre en compte les snail case
-    def generateConformation(self) :
+    def generateConformationRandom(self) :
         i, j = self.length, self.length
         self.__representation[i][j].setResidu(self.sequence[0])
+        self.__representation[i][j].translateHP()
         self.__coordinate[0] = [i, j]
 
         for k, residu in enumerate(self.sequence[1:], 1) :
             new_coordinate = self.__getFreePosition(k - 1)
             if (new_coordinate == None) :
-                print("Snail case detected")
+                #print("Snail case detected")
                 self._createRepresentation()
-                self.generateConformation()
+                self.__coordinate = [[0, 0] for i in range(self.length)]
+                self.generateConformationRandom()
                 return
             else :
                 i, j = new_coordinate[0], new_coordinate[1]
@@ -112,6 +135,18 @@ class Conformation :
                 self.__representation[i][j].setPrevious(previous)
             previous = self.__representation[i][j]
         """
+
+    def copy(self) :
+        new_conformation = Conformation(self.sequence, self.temperature)
+        new_conformation.__coordinate = copy.deepcopy(self.getCoordinate())
+        new_conformation.energy = self.getEnergy()
+        for k in range(len(self.__coordinate)) :
+            i, j = self.__coordinate[k][0], self.__coordinate[k][1]
+            new_conformation.__representation[i][j].setResidu(self.getRepresentation()[i][j].getResidu())
+            new_conformation.__representation[i][j].translateHP()
+        return new_conformation
+
+
 
     def checkCoordinate(self) :
         for k in range(len(self.__coordinate)) :
@@ -257,11 +292,6 @@ class Conformation :
                 else :
                     self.pullMove(k)
         except :
-            #print("The conformation has not been changed")
-            """
-            k = random.choice(list(range(0, self.length)))
-            self.changeConformation(k)
-            """
             k = random.choice(list(range(0, self.length)))
             self.changeConformation(k)
             
@@ -310,6 +340,7 @@ class Conformation :
 class MovementError(Exception):
     """Raised when a movement is impossible"""
     pass
+
 """
 ma_conformation = Conformation("ARKLHGLARKLHGLARKLHGL", 220)
 ma_conformation.generateConformation()
@@ -326,36 +357,9 @@ for i in tqdm(range(500), "TEST MC ") :
     #print(ma_conformation.getEnergy(), " ", temp_conformation.getEnergy())
 ma_conformation.printConformation(False)
 """
-"""
+
 if __name__ == "__main__" :
     modele = False
-    ma_conformation = Conformation("ARKLHGLARKLHGLARKLHGLARKLHGLAR", 220)
+    ma_conformation = Conformation("ARKLHGLARKLHGLARKLHGL", 220)
     ma_conformation.generateConformation()
-    ma_conformation.translateHP()
-    ma_conformation.printConformation(modele)
-    print("Len sequence : ", ma_conformation.length, " | Taille representation : ", len(ma_conformation.getRepresentation()[0]))
-    print("Done !")
-    ma_conformation.translateHP()
-    ma_conformation.printConformation(modele)
-    for i in range (10000) :
-        k = random.choice(list(range(0, ma_conformation.length)))
-        ma_conformation.changeConformation(k)
-        ma_conformation.checkCoordinate()
     ma_conformation.printConformation(False)
-    ma_conformation.printConformation(True)
-    ma_conformation.calculateEnergy()
-    ma_conformation.getEnergy()
-    print(ma_conformation.length, " ", len(ma_conformation.getRepresentation[0]))
-    print("Done !")
-    #ma_conformation.calculateEnergy()
-    #ma_conformation.endMove(6)
-    #ma_conformation.cornerMove(5)
-    #ma_conformation.crankshaftMove(2)
-    #ma_conformation.pullMove(3)
-    #ma_conformation.printConformation()
-"""
-if __name__ == "__main__" :
-    modele = False
-    ma_conformation = Conformation("ARKLHGLARKLHGLARKLHGLARKLHGLAR", 220)
-    ma_conformation.generateConformation()
-    ma_conformation.generate3D()

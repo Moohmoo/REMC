@@ -1,6 +1,5 @@
 import time
 import argparse
-from tqdm import tqdm
 
 from residu import Residu
 from conformation import Conformation, MovementError
@@ -45,18 +44,21 @@ parser.add_argument("r", type=int, help="number of replicas to simulate")
 parser.add_argument("p", type=int, help="the probability of performing a pull move")
 parser.add_argument("file", nargs='+', help="a protein fasta file")
 parser.add_argument("-o", "--output", help="directs the output to a name of your choice")
+parser.add_argument("-g", "--graphic", action="store_false", help="directs the output to a 3D graphic")
 args = parser.parse_args()
 
 for file_name in args.file :
     sequence = readFasta(file_name)
     start = time.time()
-    conformations = remc.REMCSimulation(sequence, -2, args.n, args.temp_min, args.r, args.p)
+    #"ARKLHGLARKLHGL"
+    random = True
+    conformations = remc.REMCSimulation(sequence, -30, args.n, args.temp_min, args.r, args.p, 2, random)
     best_conformation = remc.getBestConformation(conformations)
     print("Energy : ", best_conformation.getEnergy())
     end = time.time()
     print(f"The elapsed time in seconds : {end - start:0.2f}")
-    args = vars(parser.parse_args())
-    args = vars(parser.parse_args())
-    print(args)
+    args = vars(args)
     if (args["output"] is not None) :
         writeOutFile(args["output"], best_conformation, False)
+    if (not args["graphic"]) :
+        best_conformation.generate3D()
