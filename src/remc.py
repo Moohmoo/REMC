@@ -1,8 +1,8 @@
 import random
 import math
 import copy
-import time
 from tqdm import tqdm
+import os
 
 from conformation import Conformation
 
@@ -11,6 +11,7 @@ from conformation import Conformation
 # number of replicas to simulate 
 
 def MCsearch (n_mc, conformation) :
+    print('process id:', os.getpid())
     for i in tqdm(range(n_mc), desc="MC research processing ") :
         temp_conformation = copy.deepcopy(conformation)
         k = random.uniform(0, temp_conformation.getLength() - 1)
@@ -64,7 +65,12 @@ def getBestConformation(conformations) :
     for i in range(1, len(conformations)) :
         if (best_conformation.getEnergy() > conformations[i].getEnergy()) :
             best_conformation = conformations[i]
-    return best_conformation
+    return 
+    
+def main() :
+    conformations = REMCSimulation("ARKLHGLARKLHGLARKLHGLARKLHGL", -2, 500, 220, 250, 2, 0.5)
+    best_conformation = getBestConformation(conformations)
+
 
 if __name__ == "__main__" :
     """
@@ -76,5 +82,4 @@ if __name__ == "__main__" :
     end = time.time()
     print(f"The elapsed time in seconds : {end - start:0.2f}")
     """
-    conformations = REMCSimulation("ARKLHGLARKLHGLARKLHGLARKLHGL", -2, 500, 220, 250, 2, 0.5)
-    best_conformation = getBestConformation(conformations)
+    main()

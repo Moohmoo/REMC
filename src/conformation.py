@@ -1,6 +1,10 @@
 import random
 import math
-import sys
+from tqdm import tqdm
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 
 from residu import Residu
 
@@ -36,6 +40,25 @@ class Conformation :
                     print(self.__representation[i][j], " ", end="")
             print("|")
         print("----------------------------------")
+
+    def generate3D(self) :
+        fig = plt.figure(figsize=(5,5))
+        ax = plt.axes(projection='3d')
+        plt.grid(False)
+        plt.axis(False)
+        coordinate = self.__coordinate
+        x, y = [], []
+        previousX = coordinate[0][0]
+        previousY = coordinate[0][1]
+        for i in range(1, len(coordinate)) :
+            x.append(coordinate[i][0])
+            y.append(coordinate[i][1])
+            ax.plot([0, 0] , [previousX, coordinate[i][0]], [previousY, coordinate[i][1]], color="black")
+            ax.text(0, coordinate[i][0] + 0.15, coordinate[i][1] + 0.25, "H")
+            previousX = coordinate[i][0]
+            previousY = coordinate[i][1]
+        ax.scatter(0, x, y)
+        plt.show()
 
     def __getFreePosition(self, k) :
         steps = [[-1, 0], [1, 0], [0, -1], [0, 1]]
@@ -197,23 +220,25 @@ class Conformation :
         return None
 
     def pullMove(self, k) :
-        positions = [[k + 1, k - 1], [k - 1, k + 1]]
+        sens = random.choice([0, 1])
+        positions = [[k + 1, k - 1, 2, 1], [k - 1, k + 1, -2, -1]]
         if (k >= 1 and k <= self.length - 2) :
             new_coordinate1 = self.__getFreePosition(k)
-            new_coordinate2 = self.__getFreePosition(k + 1)
+            #new_coordinate2 = self.__getFreePosition(k + 1)
+            new_coordinate2 = self.__getFreePosition(positions[sens][0])
             if (new_coordinate1 != None and new_coordinate2 != None and new_coordinate1 != new_coordinate2 and 
                 math.dist(new_coordinate1, new_coordinate2) == 1 and 
-                math.dist(new_coordinate1, self.__coordinate[k - 1]) == math.sqrt(2) and
+                math.dist(new_coordinate1, self.__coordinate[positions[sens][1]]) == math.sqrt(2) and
                 math.dist(new_coordinate2, self.__coordinate[k]) == math.sqrt(2)) :
-                old_coordinate1 = self.__coordinate[k-1]
+                old_coordinate1 = self.__coordinate[positions[sens][1]]
                 old_coordinate2 = self.__coordinate[k]
                 self.__move(new_coordinate2, old_coordinate2, k)
-                self.__move(new_coordinate1, old_coordinate1, k - 1)
-                i = 2
+                self.__move(new_coordinate1, old_coordinate1, positions[sens][1])
+                i = positions[sens][2]
                 while (k - i >= 0 and not self.__isConnect(k - i)) :
                     self.__move(old_coordinate2, self.__coordinate[k - i], k - i)
                     old_coordinate2 = old_coordinate1
-                    i += 1
+                    i += positions[sens][3]
             else :
                 raise MovementError("PullMove impossible")
         else :
@@ -232,11 +257,14 @@ class Conformation :
                 else :
                     self.pullMove(k)
         except :
-            #print("The conformation has not been changed. Reloading ...")
+            #print("The conformation has not been changed")
             """
             k = random.choice(list(range(0, self.length)))
             self.changeConformation(k)
             """
+            k = random.choice(list(range(0, self.length)))
+            self.changeConformation(k)
+            
     def calculateEnergy(self) :
         energy = 0
         for k in range(len(self.__coordinate)) :
@@ -282,7 +310,22 @@ class Conformation :
 class MovementError(Exception):
     """Raised when a movement is impossible"""
     pass
-
+"""
+ma_conformation = Conformation("ARKLHGLARKLHGLARKLHGL", 220)
+ma_conformation.generateConformation()
+ma_conformation.printConformation(False)
+for i in tqdm(range(500), "TEST MC ") :
+#for i in range(500) :
+    k = random.uniform(0, ma_conformation.getLength() - 1)
+    #temp_conformation = ma_conformation
+    #temp_conformation = copy.deepcopy(ma_conformation)
+    temp_conformation = ujson.loads(ujson.dumps(ma_conformation))
+    temp_conformation.changeConformation(k)
+    temp_conformation.calculateEnergy()
+    ma_conformation.calculateEnergy()
+    #print(ma_conformation.getEnergy(), " ", temp_conformation.getEnergy())
+ma_conformation.printConformation(False)
+"""
 """
 if __name__ == "__main__" :
     modele = False
@@ -311,3 +354,8 @@ if __name__ == "__main__" :
     #ma_conformation.pullMove(3)
     #ma_conformation.printConformation()
 """
+if __name__ == "__main__" :
+    modele = False
+    ma_conformation = Conformation("ARKLHGLARKLHGLARKLHGLARKLHGLAR", 220)
+    ma_conformation.generateConformation()
+    ma_conformation.generate3D()
