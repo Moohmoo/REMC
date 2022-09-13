@@ -1,19 +1,30 @@
+"""Python file grouping the functions necessary for the REMC (replica exchange Monte-Carlo) algorithm
+"""
+
+from conformation import Conformation
+
 import random
 import math
 import copy
 from tqdm import tqdm
 import os
 
-from conformation import Conformation
-
-# Paramters : (φ, τ Min , τ max , χ, ρ) with φ the number of local steps in a Monte Carlo search, 
-# τ min , and τ max , are the minimum and maximum temperature values respectively, χ is the
-# number of replicas to simulate 
-
 def MCsearch (n_mc, conformation) :
+    """Performs the Monte-Carlo search explained in the article (by Thachuk, C. and al.).
+
+    Parameters
+    ----------
+    n_mc : int
+        the number of local steps in a Monte Carlo search.
+
+    Returns
+    -------
+    object
+        return the object corresponding to a conformation after a simulation.
+    """
     print('process id:', os.getpid())
     for i in tqdm(range(n_mc), desc="MC research processing ") :
-        temp_conformation = conformation.copy()
+        temp_conformation = copy.deepcopy(conformation)
         k = random.uniform(0, temp_conformation.getLength() - 1)
         temp_conformation.changeConformation(k)
         temp_conformation.calculateEnergy()
@@ -27,7 +38,31 @@ def MCsearch (n_mc, conformation) :
                 conformation = temp_conformation
     return conformation
 
-def REMCSimulation(sequence, optimal_energy, n_mc, temp_min, temp_max, n_replica, step, random) :
+def REMCSimulation(sequence, optimal_energy, n_mc, temp_min, temp_max, n_replica, random) :
+    """Performs the replica exchange Monte-Carlo explained in the article (by Thachuk, C. and al.).
+
+    Parameters
+    ----------
+    sequence : str
+        the string containing the sequence.
+    optimal energy : int
+        the optimal energy threshold.
+    n_mc : int
+        the number of local steps in a Monte Carlo search.
+    temp_min : int
+        the minimum temperature values.
+    temp_max : int
+        the maximum temperature values.
+    n_replica : int
+        the number of replicas to simulate.
+    random : boolean
+        the type of conformation to generate.
+
+    Returns
+    -------
+    list
+        return a list containing the replicas after the simulations.
+    """
     temp_energy = 0
     conformations = [None for i in range(n_replica)]
     temperature = temp_min
@@ -42,7 +77,7 @@ def REMCSimulation(sequence, optimal_energy, n_mc, temp_min, temp_max, n_replica
                 print("Generate a linear conformation ...")
                 conformation_temp.generateConformationLinear()
             conformations[i] = MCsearch(n_mc, conformation_temp)
-            print("Energy conformation : ", conformations[i].getEnergy())
+            print("Energy of replica ", i, " : ", conformations[i].getEnergy())
             if conformations[i].getEnergy() < temp_energy :
                 temp_energy = conformations[i].getEnergy()
         
@@ -63,35 +98,24 @@ def REMCSimulation(sequence, optimal_energy, n_mc, temp_min, temp_max, n_replica
                     temperature_temp = conformations[i].getTemperature()
                     conformations[i].setTemperature(conformations[j])
                     conformations[j].setTemperature(temperature_temp)
-    print("[REMC Simulation done]")
+    print("REMC Simulation done !")
     return conformations
     
 def getBestConformation(conformations) :
+    """Determines the best conformation among a list of conformations.
+
+    Parameters
+    ----------
+    conformations : list
+        a list containing conformation objects.
+
+    Returns
+    -------
+    object
+        return the object corresponding to the best conformation.
+    """
     best_conformation = conformations[0]
     for i in range(1, len(conformations)) :
         if (best_conformation.getEnergy() > conformations[i].getEnergy()) :
             best_conformation = conformations[i]
     return best_conformation
-    
-def main() :
-    print('process id:', os.getpid())
-    conformation = Conformation("ARKLHGLARKLHGLARKLHGLARKLHGL", 220)
-    conformation.generateConformation()
-    for i in tqdm(range(500), desc="MC research processing ") :
-        temp_conformation = conformation.copy()
-        k = random.uniform(0, temp_conformation.getLength() - 1)
-        temp_conformation.changeConformation(k)
-        temp_conformation.calculateEnergy()
-        conformation.calculateEnergy()
-        diff_energy = temp_conformation.getEnergy() - conformation.getEnergy()
-        if diff_energy <= 0 :
-            conformation = temp_conformation
-        else :
-            q = random.uniform(0, 1)
-            if q > math.exp((-diff_energy)/conformation.getTemperature()) :
-                conformation = temp_conformation
-    print("Energy : ", conformation.getEnergy())
-    conformation.generate3D()
-
-if __name__ == "__main__" :
-    main()
