@@ -74,4 +74,4 @@ algorithm for protein folding in the HP model. BMC Bioinformatics. 2007 Sep
 17;8:342. PubMed PMID: 17875212; PubMed Central PMCID: PMC2071922.*
 
 # Contact
-If you have any question or suggestion, please contact Moohmoo
+If you have any question or suggestion, please contact @Moohmoo
