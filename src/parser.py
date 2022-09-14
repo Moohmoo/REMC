@@ -63,7 +63,7 @@ for file_name in args.file :
     random = True
     conformations = remc.REMCSimulation(sequence, args.optimal, args.n, args.temp_min, args.temp_max, args.r, random)
     best_conformation = remc.getBestConformation(conformations)
-    print("Energy : ", best_conformation.getEnergy())
+    print("Best Energy : ", best_conformation.getEnergy())
     end = time.time()
     print(f"The elapsed time in seconds : {end - start:0.2f}")
     args = vars(args)
@@ -74,4 +74,4 @@ for file_name in args.file :
     elif (args["graphic"] == "3d") :
         best_conformation.display3D()
 
-#python3 parser.py -g 2d -o config.png -10 500 220 220 2 ../test/P01013.fasta
+#python3 parser.py -g 2d -o my_conf.png -10 500 220 220 2 ../test/P01013.fasta
