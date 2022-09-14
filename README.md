@@ -2,7 +2,7 @@
 Calculates the 2D/semi-3D folding of a protein using a REMC method described in the article by Thachuk C. et al.
 License : UPC
 
-Authors:
+Authors: \newline
     • Python implementation : Mohamed
 
 Last revision : 2022-September-14
@@ -14,8 +14,8 @@ interpreted on the Python 3 version and is exploitable on any type of operating 
 A set of test data is available on the `test` folder
 ### Install the program
     1. Download the programm on https://github.com/Moohmoo/REMC.
-    2. `cd src`
-    3. `python3 parser.py -h`
+    2. cd src
+    3. python3 parser.py -h
 ### Parameters
 
 ### Examples
