@@ -64,7 +64,7 @@ Here we define an optimal energy at -10, a number of Monte Carlo iterations at 5
 and 250 respectively and a number of replicates of 2. The options -g define the type of representation and -o the output.
 
 ### Important notes
-All the fasta files to be tested must be present in the test file in order to run the program.
+All the fasta files to be tested must be present in the `test` folder in order to run the program.
 The file name of the output does not need an absolute path: the simple name is enough (see Example).
 
 # Reference
