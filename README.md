@@ -57,7 +57,9 @@ The file will be available in the `res` folder.
 
 ### Examples
 REMC simulation
-`python3 parser.py -g 2d -o my_conf.png -10 500 220 250 2 ../test/P01013.fasta`
+```
+python3 parser.py -g 2d -o my_conf.png -10 500 220 250 2 ../test/P01013.fasta
+```
 Here we define an optimal energy at -10, a number of Monte Carlo iterations at 500, a minimum and maximum temperature of 220
 and 250 respectively and a number of replicates of 2. The options -g define the type of representation and -o the output.
 
