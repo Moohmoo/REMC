@@ -17,11 +17,11 @@ A set of test data is available on the test folder
 
 ### Install the program
 1. Download the programm on https://github.com/Moohmoo/REMC
-2. cd src 
-3. python3 parser.py -h
+2. `cd src` 
+3. `python3 parser.py -h`
 
 ### Parameters
-`
+```
 usage: parser.py [-h] [-o OUTPUT] [-g GRAPHIC]
              optimal n temp_min temp_max r file [file ...]
 
@@ -41,7 +41,7 @@ optional arguments:
                             directs the output to a name of your choice
     -g GRAPHIC, --graphic GRAPHIC
                             directs the output to a 2D or 3D graphic
-`
+```
 
 ### Program input
 Input files can be in FASTA format. The files can contain only one sequence.
