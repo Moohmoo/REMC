@@ -73,5 +73,3 @@ for file_name in args.file :
         best_conformation.display2D(False, file_name+".png")
     elif (args["graphic"] == "3d") :
         best_conformation.display3D()
-
-#python3 parser.py -g 2d -o my_conf.png -10 500 220 220 2 ../test/P01013.fasta
